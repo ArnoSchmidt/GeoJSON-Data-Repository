@@ -2,473 +2,336 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prime Spirals: Ulam & Sacks</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Prime Spirals</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0a0a0f;
-    color: #e0e0e0;
-    font-family: 'Courier New', monospace;
-    min-height: 100vh;
-  }
-  header {
-    padding: 18px 32px;
-    border-bottom: 1px solid #1e1e2e;
-    display: flex;
-    align-items: baseline;
-    gap: 16px;
-  }
-  header h1 { font-size: 1.3rem; color: #a0c4ff; letter-spacing: 0.05em; }
-  header span { font-size: 0.78rem; color: #666; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #1e1e2e;
+}
+header h1 { font-size: 1.1rem; color: #a0c4ff; }
+header p  { font-size: 0.7rem; color: #555; margin-top: 2px; }
 
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 14px 32px;
-    background: #0d0d16;
-    border-bottom: 1px solid #1e1e2e;
-    align-items: center;
-  }
-  .control-group { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
-  label { color: #aaa; white-space: nowrap; }
-  input[type=range] {
-    width: 120px;
-    accent-color: #a0c4ff;
-  }
-  input[type=checkbox] { accent-color: #a0c4ff; cursor: pointer; }
-  .val { color: #a0c4ff; min-width: 42px; }
-  select {
-    background: #1a1a2e;
-    border: 1px solid #333;
-    color: #e0e0e0;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 0.8rem;
-  }
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #0d0d16;
+  border-bottom: 1px solid #1e1e2e;
+  align-items: center;
+}
+.ctrl { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+label { color: #aaa; white-space: nowrap; }
+input[type=range] { width: 100px; accent-color: #a0c4ff; }
+input[type=checkbox] { accent-color: #a0c4ff; width:16px; height:16px; cursor:pointer; }
+.val { color: #a0c4ff; min-width: 38px; }
+select {
+  background: #1a1a2e; border: 1px solid #333; color: #e0e0e0;
+  padding: 3px 6px; border-radius: 4px; font-family: inherit; font-size: 0.78rem;
+}
 
-  .canvases {
-    display: flex;
-    gap: 0;
-    padding: 24px 32px;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 32px;
-  }
-  .panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-  .panel-title {
-    font-size: 0.9rem;
-    color: #c8b8ff;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .panel-sub {
-    font-size: 0.7rem;
-    color: #555;
-    text-align: center;
-    max-width: 360px;
-    line-height: 1.5;
-  }
-  canvas {
-    border: 1px solid #1e1e2e;
-    border-radius: 4px;
-    cursor: crosshair;
-  }
-  .tooltip {
-    position: fixed;
-    background: rgba(10,10,20,0.92);
-    border: 1px solid #333;
-    border-radius: 4px;
-    padding: 6px 10px;
-    font-size: 0.75rem;
-    color: #e0e0e0;
-    pointer-events: none;
-    display: none;
-    z-index: 100;
-  }
-  .prime-label { color: #a0c4ff; }
-  .composite-label { color: #666; }
+.panels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 16px 32px;
+}
+.panel { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.panel-title { font-size: 0.85rem; color: #c8b8ff; letter-spacing: 0.08em; text-transform: uppercase; }
+.panel-sub { font-size: 0.68rem; color: #555; text-align: center; max-width: 500px; line-height: 1.5; }
 
-  .legend {
-    display: flex;
-    gap: 18px;
-    font-size: 0.72rem;
-    color: #888;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .legend-item { display: flex; align-items: center; gap: 5px; }
-  .swatch { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+canvas { border: 1px solid #1e1e2e; border-radius: 4px; display: block; touch-action: none; }
+
+.tooltip {
+  position: fixed;
+  background: rgba(10,10,20,0.93);
+  border: 1px solid #333;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  pointer-events: none;
+  display: none;
+  z-index: 100;
+}
+.prime-lbl { color: #a0c4ff; }
+.comp-lbl  { color: #666; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Prime Spirals</h1>
-  <span>Ulam (1963) &nbsp;·&nbsp; Sacks (1994) &nbsp;·&nbsp; hover any point for details</span>
+  <p>Ulam (1963) · Sacks (1994) — tap a dot for details</p>
 </header>
 
 <div class="controls">
-  <div class="control-group">
-    <label>Range (N)</label>
-    <input type="range" id="rangeN" min="500" max="40000" step="500" value="10000">
-    <span class="val" id="rangeNVal">10 000</span>
+  <div class="ctrl">
+    <label>N</label>
+    <input type="range" id="rangeN" min="200" max="20000" step="200" value="5000">
+    <span class="val" id="rangeNVal">5 000</span>
   </div>
-  <div class="control-group">
-    <label>Prime color</label>
+  <div class="ctrl">
+    <label>Color</label>
     <select id="colorScheme">
       <option value="blue">Ice blue</option>
       <option value="gold">Gold</option>
       <option value="green">Neon green</option>
-      <option value="rainbow">Rainbow (by magnitude)</option>
+      <option value="rainbow">Rainbow</option>
     </select>
   </div>
-  <div class="control-group">
-    <label>Show composites</label>
+  <div class="ctrl">
+    <label>Composites</label>
     <input type="checkbox" id="showComposites" checked>
-  </div>
-  <div class="control-group">
-    <label>Dot size</label>
-    <input type="range" id="dotSize" min="1" max="5" step="0.5" value="1.5">
-    <span class="val" id="dotSizeVal">1.5</span>
-  </div>
-  <div class="control-group">
-    <label>Highlight &nbsp;<code style="font-size:0.75rem;color:#c8b8ff">4n²+bn+c</code></label>
-    <input type="checkbox" id="showPoly">
-    <input type="number" id="polyB" value="2" min="-20" max="20" style="width:46px;background:#1a1a2e;border:1px solid #333;color:#e0e0e0;padding:2px 4px;font-family:inherit;font-size:0.78rem;" title="b">
-    <input type="number" id="polyC" value="41" min="-100" max="200" style="width:52px;background:#1a1a2e;border:1px solid #333;color:#e0e0e0;padding:2px 4px;font-family:inherit;font-size:0.78rem;" title="c">
-    <span style="font-size:0.7rem;color:#666">(b, c — Euler's b=1,c=41 by default)</span>
   </div>
 </div>
 
-<div class="canvases">
+<div class="panels">
   <div class="panel">
     <div class="panel-title">Ulam Spiral</div>
-    <canvas id="ulamCanvas" width="480" height="480"></canvas>
-    <div class="panel-sub">Integers laid out in a rectangular spiral from the centre. Prime diagonal lines correspond to quadratic polynomials 4n² + bn + c.</div>
+    <canvas id="ulamCanvas"></canvas>
+    <div class="panel-sub">Integers in a rectangular spiral. Prime diagonals trace quadratic polynomials 4n²+bn+c.</div>
   </div>
   <div class="panel">
     <div class="panel-title">Sacks Spiral</div>
-    <canvas id="sacksCanvas" width="480" height="480"></canvas>
-    <div class="panel-sub">Integers on an Archimedean spiral — n plotted at angle 2π√n, radius √n. Perfect squares align on the rightward ray; primes form curves.</div>
+    <canvas id="sacksCanvas"></canvas>
+    <div class="panel-sub">Integer n at polar coords (√n, 2π√n). Perfect squares align right; primes form curves.</div>
   </div>
 </div>
 
-<div style="padding: 0 32px 8px; display:flex; justify-content:center;">
-  <div class="legend" id="legend">
-    <div class="legend-item"><div class="swatch" style="background:#a0c4ff"></div>prime</div>
-    <div class="legend-item"><div class="swatch" style="background:#222230"></div>composite</div>
-    <div class="legend-item"><div class="swatch" id="polySwatch" style="background:#ff6b6b;display:none"></div><span id="polyLegendText" style="display:none">4n²+bn+c highlight</span></div>
-  </div>
-</div>
-
-<div class="tooltip" id="tooltip"></div>
+<div id="tooltip" class="tooltip"></div>
 
 <script>
-// ─── Sieve of Eratosthenes ────────────────────────────────────────────────
+// ── Sieve ──────────────────────────────────────────────────────────────────
 function sieve(limit) {
-  const isPrime = new Uint8Array(limit + 1).fill(1);
-  isPrime[0] = isPrime[1] = 0;
-  for (let i = 2; i * i <= limit; i++) {
-    if (isPrime[i]) {
-      for (let j = i * i; j <= limit; j += i) isPrime[j] = 0;
-    }
-  }
-  return isPrime;
+  const ip = new Uint8Array(limit + 1).fill(1);
+  ip[0] = ip[1] = 0;
+  for (let i = 2; i * i <= limit; i++)
+    if (ip[i]) for (let j = i*i; j <= limit; j += i) ip[j] = 0;
+  return ip;
 }
 
-// ─── Color helpers ────────────────────────────────────────────────────────
+// ── Canvas sizing: fill available width, square, HiDPI aware ──────────────
+function makeCanvas(el) {
+  const dpr = window.devicePixelRatio || 1;
+  const size = Math.min(window.innerWidth - 32, 520);
+  el.style.width  = size + 'px';
+  el.style.height = size + 'px';
+  el.width  = Math.round(size * dpr);
+  el.height = Math.round(size * dpr);
+  return { size, dpr };
+}
+
+// ── Prime colour ───────────────────────────────────────────────────────────
 function primeColor(n, maxN, scheme) {
   if (scheme === 'blue')    return '#a0c4ff';
   if (scheme === 'gold')    return '#ffd166';
   if (scheme === 'green')   return '#06ffa5';
-  if (scheme === 'rainbow') {
-    const t = n / maxN;
-    const h = Math.round(t * 280);
-    return `hsl(${h},90%,65%)`;
-  }
-  return '#a0c4ff';
+  const h = Math.round((n / maxN) * 280);
+  return `hsl(${h},90%,65%)`;
 }
 
-// ─── Ulam spiral coordinate ───────────────────────────────────────────────
-// Returns {x, y} in grid coords centred at (0,0) for integer n (1-indexed)
+// ── Ulam grid coordinate ──────────────────────────────────────────────────
 function ulamCoord(n) {
   if (n === 1) return { x: 0, y: 0 };
-  // shell k: numbers (2k-1)²+1 .. (2k+1)²
-  const k = Math.ceil((Math.sqrt(n) - 1) / 2);
+  const k    = Math.ceil((Math.sqrt(n) - 1) / 2);
   const side = 2 * k;
-  const start = (2 * k - 1) * (2 * k - 1); // first number of shell k
-  const pos = n - start - 1; // 0-indexed position within shell
-  // Shell traversal: right 1, up side, left side, down side, right side-1
-  const segments = [1, side, side, side, side - 1]; // lengths per edge segment
-  // starting point of shell: (k-1, -k+1) then move right to (k, -k+1)
-  // Actually use closed-form:
-  // Bottom right corner of shell k: (k, -(k-1))
-  // Travel: up -> left -> down -> right
-  const starts = [
-    [k - 1, -(k - 1)], // right 1 step -> (k, -(k-1))
-    [k,     -(k - 1)], // up side steps
-    [k,     k],        // left side steps
-    [-k,    k],        // down side steps
-    [-k,    -k],       // right side-1 steps
-  ];
-  // simpler: just accumulate
-  let x = k - 1, y = -(k - 1);
-  // first step is always right 1
-  let p = pos;
-  // right 1
-  if (p < 1) { x += p + 1; return { x, y }; }
-  x += 1; p -= 1;
-  // up side
-  if (p < side) { y += p + 1; return { x, y }; }
-  y += side; p -= side;
-  // left side
-  if (p < side) { x -= p + 1; return { x, y }; }
-  x -= side; p -= side;
-  // down side
-  if (p < side) { y -= p + 1; return { x, y }; }
-  y -= side; p -= side;
-  // right (side-1)
-  x += p + 1;
-  return { x, y };
+  const pos  = n - (2*k-1)*(2*k-1) - 1;
+  let x = k-1, y = -(k-1), p = pos;
+  if (p < 1)    { x += p+1; return {x,y}; }  x += 1;    p -= 1;
+  if (p < side) { y += p+1; return {x,y}; }  y += side; p -= side;
+  if (p < side) { x -= p+1; return {x,y}; }  x -= side; p -= side;
+  if (p < side) { y -= p+1; return {x,y}; }  y -= side; p -= side;
+  x += p+1; return {x,y};
 }
 
-// ─── Build lookup: grid coord -> n (for Ulam hover) ───────────────────────
-let ulamMap = null; // {key -> n}
+// ── State ──────────────────────────────────────────────────────────────────
+let maxN     = 5000;
+let isPrime  = sieve(maxN);
+let ulamMap  = new Map();  // "gx,gy" -> n
+let sacksArr = [];         // [{n, px, py}] (CSS pixels)
 
-function buildUlamMap(maxN) {
-  const map = new Map();
-  for (let n = 1; n <= maxN; n++) {
-    const { x, y } = ulamCoord(n);
-    map.set(`${x},${y}`, n);
-  }
-  return map;
-}
-
-// ─── Render Ulam ─────────────────────────────────────────────────────────
-function renderUlam(canvas, isPrime, maxN, cfg) {
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#080810';
-  ctx.fillRect(0, 0, W, H);
-
-  // determine grid extent from maxN
-  const gridR = Math.ceil(Math.sqrt(maxN) / 2) + 1;
-  const cellSize = Math.min(W, H) / (2 * gridR + 1);
-  const dotR = Math.min(cfg.dotSize, cellSize * 0.48);
-  const cx = W / 2, cy = H / 2;
-
-  // polynomial set
-  const polySet = new Set();
-  if (cfg.showPoly) {
-    const b = cfg.polyB, c = cfg.polyC;
-    for (let n = 0; 4*n*n + b*n + c <= maxN; n++) {
-      const v = 4*n*n + b*n + c;
-      if (v >= 1) polySet.add(v);
-    }
-    for (let n = -1; 4*n*n + b*n + c <= maxN && n >= -1000; n--) {
-      const v = 4*n*n + b*n + c;
-      if (v >= 1) polySet.add(v);
-    }
-  }
-
-  ulamMap = new Map();
-
-  ctx.save();
-  for (let n = 1; n <= maxN; n++) {
-    const { x, y } = ulamCoord(n);
-    ulamMap.set(`${x},${y}`, n);
-    const px = cx + x * cellSize;
-    const py = cy - y * cellSize;
-    if (px < -dotR || px > W + dotR || py < -dotR || py > H + dotR) continue;
-
-    const prime = isPrime[n];
-    if (!prime && !cfg.showComposites) continue;
-
-    ctx.beginPath();
-    ctx.arc(px, py, dotR, 0, Math.PI * 2);
-    if (cfg.showPoly && polySet.has(n) && prime) {
-      ctx.fillStyle = '#ff6b6b';
-    } else if (prime) {
-      ctx.fillStyle = primeColor(n, maxN, cfg.colorScheme);
-    } else {
-      ctx.fillStyle = '#1c1c28';
-    }
-    ctx.fill();
-  }
-  ctx.restore();
-
-  // store for hover
-  canvas._gridR = gridR;
-  canvas._cellSize = cellSize;
-  canvas._cx = cx;
-  canvas._cy = cy;
-}
-
-// ─── Render Sacks ─────────────────────────────────────────────────────────
-// Sacks spiral: n -> polar (r=√n, θ=2π√n)
-let sacksPoints = null; // [{n, px, py}]
-
-function renderSacks(canvas, isPrime, maxN, cfg) {
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#080810';
-  ctx.fillRect(0, 0, W, H);
-
-  const cx = W / 2, cy = H / 2;
-  const maxR = Math.sqrt(maxN);
-  const scale = (Math.min(W, H) / 2 - 8) / maxR;
-  const dotR = cfg.dotSize;
-
-  // polynomial set (same as Ulam)
-  const polySet = new Set();
-  if (cfg.showPoly) {
-    const b = cfg.polyB, c = cfg.polyC;
-    for (let n = 0; 4*n*n + b*n + c <= maxN; n++) {
-      const v = 4*n*n + b*n + c;
-      if (v >= 1) polySet.add(v);
-    }
-    for (let n = -1; 4*n*n + b*n + c <= maxN && n >= -1000; n--) {
-      const v = 4*n*n + b*n + c;
-      if (v >= 1) polySet.add(v);
-    }
-  }
-
-  sacksPoints = [];
-
-  ctx.save();
-  for (let n = 2; n <= maxN; n++) {
-    const r = Math.sqrt(n);
-    const theta = 2 * Math.PI * r; // angle in radians
-    const px = cx + r * scale * Math.cos(theta);
-    const py = cy - r * scale * Math.sin(theta);
-
-    const prime = isPrime[n];
-    if (!prime && !cfg.showComposites) {
-      if (prime) sacksPoints.push({ n, px, py });
-      continue;
-    }
-
-    sacksPoints.push({ n, px, py });
-
-    if (px < -dotR || px > W + dotR || py < -dotR || py > H + dotR) continue;
-
-    ctx.beginPath();
-    ctx.arc(px, py, dotR, 0, Math.PI * 2);
-    if (cfg.showPoly && polySet.has(n) && prime) {
-      ctx.fillStyle = '#ff6b6b';
-    } else if (prime) {
-      ctx.fillStyle = primeColor(n, maxN, cfg.colorScheme);
-    } else {
-      ctx.fillStyle = '#1c1c28';
-    }
-    ctx.fill();
-  }
-  ctx.restore();
-
-  canvas._scale = scale;
-  canvas._cx = cx;
-  canvas._cy = cy;
-}
-
-// ─── State ────────────────────────────────────────────────────────────────
-let currentMaxN = 10000;
-let currentIsPrime = sieve(currentMaxN);
-
-function getConfig() {
+function cfg() {
   return {
-    dotSize:      parseFloat(document.getElementById('dotSize').value),
-    colorScheme:  document.getElementById('colorScheme').value,
+    colorScheme:    document.getElementById('colorScheme').value,
     showComposites: document.getElementById('showComposites').checked,
-    showPoly:     document.getElementById('showPoly').checked,
-    polyB:        parseInt(document.getElementById('polyB').value) || 0,
-    polyC:        parseInt(document.getElementById('polyC').value) || 0,
   };
 }
 
-function redraw() {
-  const cfg = getConfig();
-  renderUlam(document.getElementById('ulamCanvas'), currentIsPrime, currentMaxN, cfg);
-  renderSacks(document.getElementById('sacksCanvas'), currentIsPrime, currentMaxN, cfg);
-  const show = cfg.showPoly;
-  document.getElementById('polySwatch').style.display = show ? 'inline-block' : 'none';
-  document.getElementById('polyLegendText').style.display = show ? 'inline' : 'none';
+// ── Render Ulam ────────────────────────────────────────────────────────────
+function renderUlam() {
+  const el  = document.getElementById('ulamCanvas');
+  const { size, dpr } = makeCanvas(el);
+  const ctx = el.getContext('2d');
+  const C   = cfg();
+  const W   = el.width, H = el.height;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+
+  const gridR   = Math.ceil(Math.sqrt(maxN) / 2) + 1;
+  const cell    = (size * dpr) / (2 * gridR + 1);
+  const dotR    = Math.min(1.8 * dpr, cell * 0.45);
+  const cx = W/2, cy = H/2;
+
+  ulamMap = new Map();
+  ctx.save();
+
+  for (let n = 1; n <= maxN; n++) {
+    const {x, y} = ulamCoord(n);
+    ulamMap.set(`${x},${y}`, n);
+
+    const prime = isPrime[n];
+    if (!prime && !C.showComposites) continue;
+
+    const px = cx + x * cell;
+    const py = cy - y * cell;
+    if (px < -dotR || px > W+dotR || py < -dotR || py > H+dotR) continue;
+
+    ctx.beginPath();
+    ctx.arc(px, py, dotR, 0, Math.PI*2);
+    ctx.fillStyle = prime ? primeColor(n, maxN, C.colorScheme) : '#1c1c28';
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // store for tap lookup
+  el._cell = cell; el._cx = cx; el._cy = cy; el._dpr = dpr;
 }
 
-// ─── Controls ─────────────────────────────────────────────────────────────
-const rangeN = document.getElementById('rangeN');
-rangeN.addEventListener('input', () => {
-  const v = parseInt(rangeN.value);
-  document.getElementById('rangeNVal').textContent = v.toLocaleString();
-  currentMaxN = v;
-  currentIsPrime = sieve(currentMaxN);
+// ── Render Sacks ───────────────────────────────────────────────────────────
+function renderSacks() {
+  const el  = document.getElementById('sacksCanvas');
+  const { size, dpr } = makeCanvas(el);
+  const ctx = el.getContext('2d');
+  const C   = cfg();
+  const W   = el.width, H = el.height;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#080810';
+  ctx.fillRect(0, 0, W, H);
+
+  const cx    = W/2, cy = H/2;
+  const maxR  = Math.sqrt(maxN);
+  const scale = (size * dpr / 2 - 6) / maxR;
+  const dotR  = Math.min(2 * dpr, scale * 0.35);
+
+  sacksArr = [];
+  ctx.save();
+
+  for (let n = 2; n <= maxN; n++) {
+    const r     = Math.sqrt(n);
+    const theta = 2 * Math.PI * r;
+    const px    = cx + r * scale * Math.cos(theta);
+    const py    = cy - r * scale * Math.sin(theta);
+    const prime = isPrime[n];
+
+    if (!prime && !C.showComposites) continue;
+
+    // store in CSS pixels for tap lookup
+    sacksArr.push({ n, px: px/dpr, py: py/dpr });
+
+    if (px < -dotR || px > W+dotR || py < -dotR || py > H+dotR) continue;
+
+    ctx.beginPath();
+    ctx.arc(px, py, dotR, 0, Math.PI*2);
+    ctx.fillStyle = prime ? primeColor(n, maxN, C.colorScheme) : '#1c1c28';
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function redraw() {
+  renderUlam();
+  renderSacks();
+}
+
+// ── Controls ───────────────────────────────────────────────────────────────
+document.getElementById('rangeN').addEventListener('input', function() {
+  maxN    = parseInt(this.value);
+  isPrime = sieve(maxN);
+  document.getElementById('rangeNVal').textContent = maxN.toLocaleString();
   redraw();
 });
 
-document.getElementById('dotSize').addEventListener('input', function() {
-  document.getElementById('dotSizeVal').textContent = this.value;
-  redraw();
-});
+['colorScheme', 'showComposites'].forEach(id =>
+  document.getElementById(id).addEventListener('change', redraw)
+);
 
-['colorScheme','showComposites','showPoly','polyB','polyC'].forEach(id => {
-  document.getElementById(id).addEventListener('change', redraw);
-  document.getElementById(id).addEventListener('input', redraw);
-});
+window.addEventListener('resize', redraw);
 
-// ─── Tooltip / hover ──────────────────────────────────────────────────────
+// ── Tooltip ────────────────────────────────────────────────────────────────
 const tooltip = document.getElementById('tooltip');
 
-function isPrimeFn(n) { return n >= 2 && currentIsPrime[n] === 1; }
-
-function showTooltip(e, n) {
-  if (!n || n < 1 || n > currentMaxN) { tooltip.style.display = 'none'; return; }
-  const prime = isPrimeFn(n);
-  tooltip.innerHTML = `<span class="${prime ? 'prime-label' : 'composite-label'}">n = ${n.toLocaleString()}</span> &nbsp; ${prime ? '&#x2713; prime' : 'composite'}`;
+function showTip(clientX, clientY, n) {
+  if (!n || n < 1 || n > maxN) { tooltip.style.display = 'none'; return; }
+  const p = isPrime[n];
+  tooltip.innerHTML = `<span class="${p ? 'prime-lbl' : 'comp-lbl'}">${n.toLocaleString()}</span> — ${p ? '✓ prime' : 'composite'}`;
   tooltip.style.display = 'block';
-  tooltip.style.left = (e.clientX + 14) + 'px';
-  tooltip.style.top  = (e.clientY - 24) + 'px';
+  tooltip.style.left = (clientX + 14) + 'px';
+  tooltip.style.top  = (clientY - 28) + 'px';
+}
+function hideTip() { tooltip.style.display = 'none'; }
+
+// Ulam hover / tap
+const ulamEl = document.getElementById('ulamCanvas');
+
+function ulamHit(clientX, clientY) {
+  const rect = ulamEl.getBoundingClientRect();
+  const dpr  = ulamEl._dpr || 1;
+  const cell = ulamEl._cell;
+  if (!cell) return null;
+  const mx = (clientX - rect.left) * dpr;
+  const my = (clientY - rect.top)  * dpr;
+  const gx = Math.round((mx - ulamEl._cx) / cell);
+  const gy = Math.round((ulamEl._cy - my) / cell);
+  return ulamMap.get(`${gx},${gy}`) || null;
 }
 
-document.getElementById('ulamCanvas').addEventListener('mousemove', function(e) {
-  const rect = this.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const cellSize = this._cellSize;
-  if (!cellSize) return;
-  const gx = Math.round((mx - this._cx) / cellSize);
-  const gy = Math.round((this._cy - my) / cellSize);
-  const n = ulamMap && ulamMap.get(`${gx},${gy}`);
-  showTooltip(e, n);
-});
+ulamEl.addEventListener('mousemove', e => showTip(e.clientX, e.clientY, ulamHit(e.clientX, e.clientY)));
+ulamEl.addEventListener('mouseleave', hideTip);
+ulamEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  showTip(t.clientX, t.clientY, ulamHit(t.clientX, t.clientY));
+}, { passive: false });
+ulamEl.addEventListener('touchend', () => setTimeout(hideTip, 1800));
 
-document.getElementById('ulamCanvas').addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+// Sacks hover / tap
+const sacksEl = document.getElementById('sacksCanvas');
 
-document.getElementById('sacksCanvas').addEventListener('mousemove', function(e) {
-  const rect = this.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  if (!sacksPoints) return;
-  // find nearest point
-  let best = null, bestDist = 12;
-  for (const pt of sacksPoints) {
+function sacksHit(clientX, clientY) {
+  const rect = sacksEl.getBoundingClientRect();
+  const mx = clientX - rect.left;
+  const my = clientY - rect.top;
+  let best = null, bestD = 14;
+  for (const pt of sacksArr) {
     const d = Math.hypot(pt.px - mx, pt.py - my);
-    if (d < bestDist) { bestDist = d; best = pt.n; }
+    if (d < bestD) { bestD = d; best = pt.n; }
   }
-  showTooltip(e, best);
-});
+  return best;
+}
 
-document.getElementById('sacksCanvas').addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+sacksEl.addEventListener('mousemove', e => showTip(e.clientX, e.clientY, sacksHit(e.clientX, e.clientY)));
+sacksEl.addEventListener('mouseleave', hideTip);
+sacksEl.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  showTip(t.clientX, t.clientY, sacksHit(t.clientX, t.clientY));
+}, { passive: false });
+sacksEl.addEventListener('touchend', () => setTimeout(hideTip, 1800));
 
-// ─── Init ─────────────────────────────────────────────────────────────────
+// ── Boot ───────────────────────────────────────────────────────────────────
 redraw();
 </script>
 </body>
