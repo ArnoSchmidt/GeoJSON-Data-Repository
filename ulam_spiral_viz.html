@@ -2,87 +2,101 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prime Spirals</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
   background: #0a0a0f;
   color: #e0e0e0;
-  font-family: 'Courier New', monospace;
+  font-family: system-ui, -apple-system, sans-serif;
   min-height: 100vh;
-  overflow-x: hidden;
 }
+
 header {
-  padding: 14px 16px;
+  padding: 14px 16px 10px;
   border-bottom: 1px solid #1e1e2e;
 }
 header h1 { font-size: 1.1rem; color: #a0c4ff; }
-header p  { font-size: 0.7rem; color: #555; margin-top: 2px; }
+header p  { font-size: 0.72rem; color: #666; margin-top: 3px; }
 
 .controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px 20px;
   padding: 12px 16px;
   background: #0d0d16;
   border-bottom: 1px solid #1e1e2e;
   align-items: center;
 }
-.ctrl { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
-label { color: #aaa; white-space: nowrap; }
-input[type=range] { width: 100px; accent-color: #a0c4ff; }
-input[type=checkbox] { accent-color: #a0c4ff; width:16px; height:16px; cursor:pointer; }
-.val { color: #a0c4ff; min-width: 38px; }
+.ctrl { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #aaa; }
+input[type=range] { width: 110px; accent-color: #a0c4ff; cursor: pointer; }
+input[type=checkbox] { width: 18px; height: 18px; accent-color: #a0c4ff; cursor: pointer; }
+.val { color: #a0c4ff; min-width: 44px; font-variant-numeric: tabular-nums; }
 select {
   background: #1a1a2e; border: 1px solid #333; color: #e0e0e0;
-  padding: 3px 6px; border-radius: 4px; font-family: inherit; font-size: 0.78rem;
+  padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;
 }
 
 .panels {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  padding: 20px 16px 32px;
+  gap: 28px;
+  padding: 20px 16px 36px;
 }
-.panel { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
-.panel-title { font-size: 0.85rem; color: #c8b8ff; letter-spacing: 0.08em; text-transform: uppercase; }
-.panel-sub { font-size: 0.68rem; color: #555; text-align: center; max-width: 500px; line-height: 1.5; }
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 540px;
+}
+.panel-title { font-size: 0.82rem; color: #c8b8ff; letter-spacing: 0.1em; text-transform: uppercase; }
+.panel-sub   { font-size: 0.68rem; color: #555; text-align: center; line-height: 1.55; max-width: 480px; }
 
-canvas { border: 1px solid #1e1e2e; border-radius: 4px; display: block; touch-action: none; }
+canvas {
+  display: block;
+  border: 1px solid #1e1e2e;
+  border-radius: 6px;
+  width: 100%;      /* CSS layout width  */
+  height: auto;     /* JS sets inline style height to match */
+  touch-action: none;
+}
 
-.tooltip {
+#tip {
   position: fixed;
-  background: rgba(10,10,20,0.93);
+  background: rgba(8,8,18,0.95);
   border: 1px solid #333;
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 0.75rem;
+  border-radius: 5px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
   pointer-events: none;
   display: none;
-  z-index: 100;
+  z-index: 99;
 }
-.prime-lbl { color: #a0c4ff; }
-.comp-lbl  { color: #666; }
+.p { color: #a0c4ff; }
+.c { color: #666; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Prime Spirals</h1>
-  <p>Ulam (1963) · Sacks (1994) — tap a dot for details</p>
+  <p>Ulam (1963) · Sacks (1994) — tap any dot to identify it</p>
 </header>
 
 <div class="controls">
   <div class="ctrl">
-    <label>N</label>
-    <input type="range" id="rangeN" min="200" max="20000" step="200" value="5000">
-    <span class="val" id="rangeNVal">5 000</span>
+    <span>N</span>
+    <input type="range" id="rN" min="500" max="15000" step="500" value="5000">
+    <span class="val" id="rNv">5 000</span>
   </div>
   <div class="ctrl">
-    <label>Color</label>
-    <select id="colorScheme">
+    <span>Color</span>
+    <select id="scheme">
       <option value="blue">Ice blue</option>
       <option value="gold">Gold</option>
       <option value="green">Neon green</option>
@@ -90,249 +104,249 @@ canvas { border: 1px solid #1e1e2e; border-radius: 4px; display: block; touch-ac
     </select>
   </div>
   <div class="ctrl">
-    <label>Composites</label>
-    <input type="checkbox" id="showComposites" checked>
+    <span>Composites</span>
+    <input type="checkbox" id="comp" checked>
   </div>
 </div>
 
 <div class="panels">
   <div class="panel">
     <div class="panel-title">Ulam Spiral</div>
-    <canvas id="ulamCanvas"></canvas>
-    <div class="panel-sub">Integers in a rectangular spiral. Prime diagonals trace quadratic polynomials 4n²+bn+c.</div>
+    <canvas id="uC"></canvas>
+    <div class="panel-sub">Integers arranged in a square spiral from the centre. Prime diagonal lines correspond to quadratic polynomials.</div>
   </div>
   <div class="panel">
     <div class="panel-title">Sacks Spiral</div>
-    <canvas id="sacksCanvas"></canvas>
-    <div class="panel-sub">Integer n at polar coords (√n, 2π√n). Perfect squares align right; primes form curves.</div>
+    <canvas id="sC"></canvas>
+    <div class="panel-sub">Integer n placed at polar angle 2π√n, radius √n. Perfect squares line up on the rightward ray; primes form arcing curves.</div>
   </div>
 </div>
 
-<div id="tooltip" class="tooltip"></div>
+<div id="tip"></div>
 
 <script>
-// ── Sieve ──────────────────────────────────────────────────────────────────
-function sieve(limit) {
-  const ip = new Uint8Array(limit + 1).fill(1);
-  ip[0] = ip[1] = 0;
-  for (let i = 2; i * i <= limit; i++)
-    if (ip[i]) for (let j = i*i; j <= limit; j += i) ip[j] = 0;
-  return ip;
+// ── Sieve of Eratosthenes ─────────────────────────────────────────────────
+function sieve(n) {
+  const a = new Uint8Array(n + 1).fill(1);
+  a[0] = a[1] = 0;
+  for (let i = 2; i * i <= n; i++)
+    if (a[i]) for (let j = i * i; j <= n; j += i) a[j] = 0;
+  return a;
 }
 
-// ── Canvas sizing: fill available width, square, HiDPI aware ──────────────
-function makeCanvas(el) {
-  const dpr = window.devicePixelRatio || 1;
-  const size = Math.min(window.innerWidth - 32, 520);
-  el.style.width  = size + 'px';
-  el.style.height = size + 'px';
-  el.width  = Math.round(size * dpr);
-  el.height = Math.round(size * dpr);
-  return { size, dpr };
+// ── Ulam spiral coordinate (verified correct) ─────────────────────────────
+// Layout: 1 at origin, first step goes right.
+// Shell k covers numbers (2k-1)²+1 … (2k+1)².
+// Traversal per shell k:
+//   Entry  (1 step):  right  → (k, -(k-1))
+//   Up   (2k-1 steps): y increases to k
+//   Left (2k steps):   x decreases to -k
+//   Down (2k steps):   y decreases to -k
+//   Right(2k steps):   x increases to k  → ends at (k, -k)
+function ulamXY(n) {
+  if (n === 1) return [0, 0];
+  const k  = Math.ceil((Math.sqrt(n) - 1) / 2);
+  const s0 = (2 * k - 1) * (2 * k - 1) + 1; // first number in shell k
+  const p  = n - s0;                          // 0-based position within shell
+
+  if (p === 0) return [k, -(k - 1)];          // entry
+
+  const u = 2 * k - 1;  // up segment length
+  if (p <= u)            return [k,  -(k - 1) + p];          // up
+
+  const lp = p - u;
+  if (lp <= 2 * k)       return [k - 1 - (lp - 1), k];      // left
+
+  const dp = lp - 2 * k;
+  if (dp <= 2 * k)       return [-k, k - 1 - (dp - 1)];     // down
+
+  const rp = dp - 2 * k;
+  return [-k + rp, -k];                                       // right
 }
 
-// ── Prime colour ───────────────────────────────────────────────────────────
-function primeColor(n, maxN, scheme) {
+// ── Colour ────────────────────────────────────────────────────────────────
+function col(n, max, scheme) {
   if (scheme === 'blue')    return '#a0c4ff';
   if (scheme === 'gold')    return '#ffd166';
   if (scheme === 'green')   return '#06ffa5';
-  const h = Math.round((n / maxN) * 280);
-  return `hsl(${h},90%,65%)`;
+  return `hsl(${Math.round(n / max * 280)},88%,62%)`;
 }
 
-// ── Ulam grid coordinate ──────────────────────────────────────────────────
-function ulamCoord(n) {
-  if (n === 1) return { x: 0, y: 0 };
-  const k    = Math.ceil((Math.sqrt(n) - 1) / 2);
-  const side = 2 * k;
-  const pos  = n - (2*k-1)*(2*k-1) - 1;
-  let x = k-1, y = -(k-1), p = pos;
-  if (p < 1)    { x += p+1; return {x,y}; }  x += 1;    p -= 1;
-  if (p < side) { y += p+1; return {x,y}; }  y += side; p -= side;
-  if (p < side) { x -= p+1; return {x,y}; }  x -= side; p -= side;
-  if (p < side) { y -= p+1; return {x,y}; }  y -= side; p -= side;
-  x += p+1; return {x,y};
+// ── Canvas sizing — reads parent's actual CSS width after layout ──────────
+function sizeCanvas(el) {
+  const dpr = window.devicePixelRatio || 1;
+  const css = el.parentElement.clientWidth; // actual available width
+  el.style.height = css + 'px';            // keep it square via inline style
+  el.width  = Math.round(css * dpr);
+  el.height = Math.round(css * dpr);
+  return { css, dpr };
 }
 
-// ── State ──────────────────────────────────────────────────────────────────
-let maxN     = 5000;
-let isPrime  = sieve(maxN);
-let ulamMap  = new Map();  // "gx,gy" -> n
-let sacksArr = [];         // [{n, px, py}] (CSS pixels)
+// ── State ─────────────────────────────────────────────────────────────────
+let N  = 5000;
+let ip = sieve(N);
+let ulamLookup = new Map();  // "x,y" → n  (for tap)
+let sacksArr   = [];         // {n, cx, cy} in CSS px (for tap)
 
-function cfg() {
+function getOpts() {
   return {
-    colorScheme:    document.getElementById('colorScheme').value,
-    showComposites: document.getElementById('showComposites').checked,
+    scheme: document.getElementById('scheme').value,
+    comp:   document.getElementById('comp').checked,
   };
 }
 
-// ── Render Ulam ────────────────────────────────────────────────────────────
-function renderUlam() {
-  const el  = document.getElementById('ulamCanvas');
-  const { size, dpr } = makeCanvas(el);
+// ── Draw Ulam ─────────────────────────────────────────────────────────────
+function drawUlam() {
+  const el  = document.getElementById('uC');
+  const { css, dpr } = sizeCanvas(el);
   const ctx = el.getContext('2d');
-  const C   = cfg();
-  const W   = el.width, H = el.height;
+  const W = el.width, H = el.height;
+  const o = getOpts();
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#080810';
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#07070f'; ctx.fillRect(0, 0, W, H);
 
-  const gridR   = Math.ceil(Math.sqrt(maxN) / 2) + 1;
-  const cell    = (size * dpr) / (2 * gridR + 1);
-  const dotR    = Math.min(1.8 * dpr, cell * 0.45);
-  const cx = W/2, cy = H/2;
+  const gridR  = Math.ceil(Math.sqrt(N) / 2) + 1;
+  const cell   = W / (2 * gridR + 1);          // in canvas px
+  const dotR   = Math.max(0.8, Math.min(cell * 0.42, 3.5 * dpr));
+  const ox = W / 2, oy = H / 2;
 
-  ulamMap = new Map();
-  ctx.save();
+  ulamLookup = new Map();
 
-  for (let n = 1; n <= maxN; n++) {
-    const {x, y} = ulamCoord(n);
-    ulamMap.set(`${x},${y}`, n);
+  for (let n = 1; n <= N; n++) {
+    const [gx, gy] = ulamXY(n);
+    ulamLookup.set(`${gx},${gy}`, n);
 
-    const prime = isPrime[n];
-    if (!prime && !C.showComposites) continue;
+    const prime = ip[n] === 1;
+    if (!prime && !o.comp) continue;
 
-    const px = cx + x * cell;
-    const py = cy - y * cell;
-    if (px < -dotR || px > W+dotR || py < -dotR || py > H+dotR) continue;
+    const px = ox + gx * cell;
+    const py = oy - gy * cell;
+    if (px < -dotR || px > W + dotR || py < -dotR || py > H + dotR) continue;
 
     ctx.beginPath();
-    ctx.arc(px, py, dotR, 0, Math.PI*2);
-    ctx.fillStyle = prime ? primeColor(n, maxN, C.colorScheme) : '#1c1c28';
+    ctx.arc(px, py, dotR, 0, 6.2832);
+    ctx.fillStyle = prime ? col(n, N, o.scheme) : '#1b1b2a';
     ctx.fill();
   }
-  ctx.restore();
 
-  // store for tap lookup
-  el._cell = cell; el._cx = cx; el._cy = cy; el._dpr = dpr;
+  el._meta = { cell, ox, oy, dpr, css };
 }
 
-// ── Render Sacks ───────────────────────────────────────────────────────────
-function renderSacks() {
-  const el  = document.getElementById('sacksCanvas');
-  const { size, dpr } = makeCanvas(el);
+// ── Draw Sacks ────────────────────────────────────────────────────────────
+function drawSacks() {
+  const el  = document.getElementById('sC');
+  const { css, dpr } = sizeCanvas(el);
   const ctx = el.getContext('2d');
-  const C   = cfg();
-  const W   = el.width, H = el.height;
+  const W = el.width, H = el.height;
+  const o = getOpts();
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#080810';
-  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#07070f'; ctx.fillRect(0, 0, W, H);
 
-  const cx    = W/2, cy = H/2;
-  const maxR  = Math.sqrt(maxN);
-  const scale = (size * dpr / 2 - 6) / maxR;
-  const dotR  = Math.min(2 * dpr, scale * 0.35);
+  const ox    = W / 2, oy = H / 2;
+  const maxR  = Math.sqrt(N);
+  const scale = (W / 2 - 4) / maxR;
+  const dotR  = Math.max(0.8, Math.min(scale * 0.32, 3 * dpr));
 
   sacksArr = [];
-  ctx.save();
 
-  for (let n = 2; n <= maxN; n++) {
+  for (let n = 2; n <= N; n++) {
+    const prime = ip[n] === 1;
+    if (!prime && !o.comp) continue;
+
     const r     = Math.sqrt(n);
     const theta = 2 * Math.PI * r;
-    const px    = cx + r * scale * Math.cos(theta);
-    const py    = cy - r * scale * Math.sin(theta);
-    const prime = isPrime[n];
+    const px    = ox + r * scale * Math.cos(theta);
+    const py    = oy - r * scale * Math.sin(theta);
 
-    if (!prime && !C.showComposites) continue;
+    sacksArr.push({ n, cx: px / dpr, cy: py / dpr }); // store CSS coords
 
-    // store in CSS pixels for tap lookup
-    sacksArr.push({ n, px: px/dpr, py: py/dpr });
-
-    if (px < -dotR || px > W+dotR || py < -dotR || py > H+dotR) continue;
+    if (px < -dotR || px > W + dotR || py < -dotR || py > H + dotR) continue;
 
     ctx.beginPath();
-    ctx.arc(px, py, dotR, 0, Math.PI*2);
-    ctx.fillStyle = prime ? primeColor(n, maxN, C.colorScheme) : '#1c1c28';
+    ctx.arc(px, py, dotR, 0, 6.2832);
+    ctx.fillStyle = prime ? col(n, N, o.scheme) : '#1b1b2a';
     ctx.fill();
   }
-  ctx.restore();
 }
 
-function redraw() {
-  renderUlam();
-  renderSacks();
-}
+function redraw() { drawUlam(); drawSacks(); }
 
-// ── Controls ───────────────────────────────────────────────────────────────
-document.getElementById('rangeN').addEventListener('input', function() {
-  maxN    = parseInt(this.value);
-  isPrime = sieve(maxN);
-  document.getElementById('rangeNVal').textContent = maxN.toLocaleString();
+// ── Controls ──────────────────────────────────────────────────────────────
+document.getElementById('rN').addEventListener('input', function () {
+  N  = +this.value;
+  ip = sieve(N);
+  document.getElementById('rNv').textContent = N.toLocaleString();
   redraw();
 });
-
-['colorScheme', 'showComposites'].forEach(id =>
-  document.getElementById(id).addEventListener('change', redraw)
-);
-
+document.getElementById('scheme').addEventListener('change', redraw);
+document.getElementById('comp').addEventListener('change', redraw);
 window.addEventListener('resize', redraw);
 
-// ── Tooltip ────────────────────────────────────────────────────────────────
-const tooltip = document.getElementById('tooltip');
+// ── Tooltip ───────────────────────────────────────────────────────────────
+const tip = document.getElementById('tip');
 
-function showTip(clientX, clientY, n) {
-  if (!n || n < 1 || n > maxN) { tooltip.style.display = 'none'; return; }
-  const p = isPrime[n];
-  tooltip.innerHTML = `<span class="${p ? 'prime-lbl' : 'comp-lbl'}">${n.toLocaleString()}</span> — ${p ? '✓ prime' : 'composite'}`;
-  tooltip.style.display = 'block';
-  tooltip.style.left = (clientX + 14) + 'px';
-  tooltip.style.top  = (clientY - 28) + 'px';
+function showTip(cx, cy, n) {
+  if (!n) { tip.style.display = 'none'; return; }
+  const prime = ip[n] === 1;
+  tip.innerHTML = `<span class="${prime ? 'p' : 'c'}">${n.toLocaleString()}</span> — ${prime ? '✓ prime' : 'composite'}`;
+  tip.style.display = 'block';
+  // keep tooltip inside viewport
+  const tx = Math.min(cx + 14, window.innerWidth - 130);
+  const ty = Math.max(cy - 32, 4);
+  tip.style.left = tx + 'px';
+  tip.style.top  = ty + 'px';
 }
-function hideTip() { tooltip.style.display = 'none'; }
+const hideTip = () => tip.style.display = 'none';
 
-// Ulam hover / tap
-const ulamEl = document.getElementById('ulamCanvas');
-
+// Ulam hit-test
 function ulamHit(clientX, clientY) {
-  const rect = ulamEl.getBoundingClientRect();
-  const dpr  = ulamEl._dpr || 1;
-  const cell = ulamEl._cell;
-  if (!cell) return null;
-  const mx = (clientX - rect.left) * dpr;
-  const my = (clientY - rect.top)  * dpr;
-  const gx = Math.round((mx - ulamEl._cx) / cell);
-  const gy = Math.round((ulamEl._cy - my) / cell);
-  return ulamMap.get(`${gx},${gy}`) || null;
+  const el   = document.getElementById('uC');
+  const rect = el.getBoundingClientRect();
+  const m    = el._meta;
+  if (!m) return null;
+  const mx   = (clientX - rect.left) * m.dpr;
+  const my   = (clientY - rect.top)  * m.dpr;
+  const gx   = Math.round((mx - m.ox) / m.cell);
+  const gy   = Math.round((m.oy - my) / m.cell);
+  return ulamLookup.get(`${gx},${gy}`) || null;
 }
 
-ulamEl.addEventListener('mousemove', e => showTip(e.clientX, e.clientY, ulamHit(e.clientX, e.clientY)));
-ulamEl.addEventListener('mouseleave', hideTip);
-ulamEl.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const t = e.touches[0];
-  showTip(t.clientX, t.clientY, ulamHit(t.clientX, t.clientY));
-}, { passive: false });
-ulamEl.addEventListener('touchend', () => setTimeout(hideTip, 1800));
-
-// Sacks hover / tap
-const sacksEl = document.getElementById('sacksCanvas');
-
+// Sacks hit-test (nearest point within 16 CSS px)
 function sacksHit(clientX, clientY) {
-  const rect = sacksEl.getBoundingClientRect();
-  const mx = clientX - rect.left;
-  const my = clientY - rect.top;
-  let best = null, bestD = 14;
+  const el   = document.getElementById('sC');
+  const rect = el.getBoundingClientRect();
+  const mx   = clientX - rect.left;
+  const my   = clientY - rect.top;
+  let best = null, bd = 16;
   for (const pt of sacksArr) {
-    const d = Math.hypot(pt.px - mx, pt.py - my);
-    if (d < bestD) { bestD = d; best = pt.n; }
+    const d = Math.hypot(pt.cx - mx, pt.cy - my);
+    if (d < bd) { bd = d; best = pt.n; }
   }
   return best;
 }
 
-sacksEl.addEventListener('mousemove', e => showTip(e.clientX, e.clientY, sacksHit(e.clientX, e.clientY)));
-sacksEl.addEventListener('mouseleave', hideTip);
-sacksEl.addEventListener('touchstart', e => {
-  e.preventDefault();
-  const t = e.touches[0];
-  showTip(t.clientX, t.clientY, sacksHit(t.clientX, t.clientY));
-}, { passive: false });
-sacksEl.addEventListener('touchend', () => setTimeout(hideTip, 1800));
+// Mouse
+document.getElementById('uC').addEventListener('mousemove', e => showTip(e.clientX, e.clientY, ulamHit(e.clientX, e.clientY)));
+document.getElementById('uC').addEventListener('mouseleave', hideTip);
+document.getElementById('sC').addEventListener('mousemove', e => showTip(e.clientX, e.clientY, sacksHit(e.clientX, e.clientY)));
+document.getElementById('sC').addEventListener('mouseleave', hideTip);
 
-// ── Boot ───────────────────────────────────────────────────────────────────
-redraw();
+// Touch
+function onTouch(hitFn, el) {
+  el.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    showTip(t.clientX, t.clientY, hitFn(t.clientX, t.clientY));
+  }, { passive: false });
+  el.addEventListener('touchend', () => setTimeout(hideTip, 2000));
+}
+onTouch(ulamHit,  document.getElementById('uC'));
+onTouch(sacksHit, document.getElementById('sC'));
+
+// ── Boot — wait for full layout before reading clientWidth ────────────────
+window.addEventListener('load', redraw);
 </script>
 </body>
 </html>
