@@ -6,66 +6,55 @@
 <title>Prime Spirals</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: #07070f;
-  color: #e0e0e0;
-  font-family: system-ui, -apple-system, sans-serif;
-  min-height: 100vh;
-}
-header { padding: 14px 16px 10px; border-bottom: 1px solid #1a1a2a; }
-header h1 { font-size: 1.1rem; color: #a0c4ff; }
-header p  { font-size: 0.7rem; color: #555; margin-top: 3px; }
+body { background: #06060d; color: #ddd; font-family: system-ui, -apple-system, sans-serif; }
+
+header { padding: 13px 16px 8px; border-bottom: 1px solid #181828; }
+header h1 { font-size: 1.05rem; color: #a0c4ff; }
+header p  { font-size: 0.68rem; color: #444; margin-top: 3px; }
 
 .controls {
-  display: flex; flex-wrap: wrap; gap: 12px 18px;
-  padding: 11px 16px; background: #0b0b18;
-  border-bottom: 1px solid #1a1a2a; align-items: center;
+  display: flex; flex-wrap: wrap; gap: 10px 16px;
+  padding: 10px 14px; background: #090914;
+  border-bottom: 1px solid #181828; align-items: center;
 }
-.ctrl { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; color: #999; }
-input[type=range]    { width: 110px; accent-color: #a0c4ff; cursor: pointer; }
-input[type=checkbox] { width: 17px; height: 17px; accent-color: #a0c4ff; cursor: pointer; }
+.ctrl { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #888; }
+input[type=range]    { width: 100px; accent-color: #a0c4ff; cursor: pointer; }
+input[type=checkbox] { width: 16px; height: 16px; accent-color: #a0c4ff; cursor: pointer; }
 .v { color: #a0c4ff; min-width: 46px; font-variant-numeric: tabular-nums; }
-select {
-  background: #13132a; border: 1px solid #2a2a3a; color: #e0e0e0;
-  padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;
-}
+select { background: #111124; border: 1px solid #252535; color: #ddd;
+         padding: 3px 7px; border-radius: 4px; font-size: 0.78rem; }
 
-.panels {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 24px; padding: 18px 14px 36px;
-}
-.panel {
-  width: 100%; max-width: 560px;
-  display: flex; flex-direction: column; align-items: center; gap: 7px;
-}
-.pt { font-size: 0.78rem; color: #c8b8ff; letter-spacing: .1em; text-transform: uppercase; }
-.ps { font-size: 0.66rem; color: #444; text-align: center; max-width: 480px; line-height: 1.55; }
-canvas {
-  display: block; width: 100%; aspect-ratio: 1 / 1;
-  border: 1px solid #1a1a2a; border-radius: 6px; touch-action: none;
-}
+.panels { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 16px 12px 36px; }
+.panel  { width: 100%; max-width: 560px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pt { font-size: 0.75rem; color: #c0b0ff; letter-spacing: .1em; text-transform: uppercase; }
+.ps { font-size: 0.64rem; color: #383848; text-align: center; max-width: 480px; line-height: 1.55; }
+.hint { font-size: 0.62rem; color: #2a2a3a; text-align: center; margin-top: 2px; }
+canvas { display: block; width: 100%; aspect-ratio: 1/1;
+         border: 1px solid #181828; border-radius: 6px; touch-action: none; }
 
-#tip {
-  position: fixed; background: rgba(6,6,18,.95);
-  border: 1px solid #2a2a3a; border-radius: 5px;
-  padding: 5px 11px; font-size: 0.78rem;
-  pointer-events: none; display: none; z-index: 99;
-}
-.pr { color: #a0c4ff; } .co { color: #555; }
+#tip { position: fixed; background: rgba(5,5,15,.95); border: 1px solid #252535;
+       border-radius: 5px; padding: 5px 11px; font-size: 0.76rem;
+       pointer-events: none; display: none; z-index: 99; }
+.pr { color: #a0c4ff; } .co { color: #444; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>Prime Spirals</h1>
-  <p>Ulam (1963) · Sacks (1994) — tap any dot to identify it</p>
+  <p>Ulam · Sacks · 3D Sacks Cone — tap dots to identify</p>
 </header>
 
 <div class="controls">
   <div class="ctrl">
-    <span>N</span>
-    <input type="range" id="rN" min="500" max="15000" step="500" value="5000">
-    <span class="v" id="vN">5 000</span>
+    <span>2D N</span>
+    <input type="range" id="rN" min="1000" max="80000" step="1000" value="10000">
+    <span class="v" id="vN">10 000</span>
+  </div>
+  <div class="ctrl">
+    <span>3D N</span>
+    <input type="range" id="rN3" min="1000" max="25000" step="1000" value="8000">
+    <span class="v" id="vN3">8 000</span>
   </div>
   <div class="ctrl">
     <span>Color</span>
@@ -83,16 +72,26 @@ canvas {
 </div>
 
 <div class="panels">
+
   <div class="panel">
     <div class="pt">Ulam Spiral</div>
     <canvas id="uC"></canvas>
-    <div class="ps">Integers in a square spiral from centre. Prime diagonals trace quadratic polynomials 4n²+bn+c.</div>
+    <div class="ps">Integers in a square spiral. Prime diagonals trace quadratic polynomials 4n²+bn+c.</div>
   </div>
+
   <div class="panel">
     <div class="pt">Sacks Spiral</div>
     <canvas id="sC"></canvas>
-    <div class="ps">Integer n at polar coords (√n, 2π√n). Perfect squares line up right; primes form arcing curves.</div>
+    <div class="ps">Integer n at polar coords (√n, 2π√n). Perfect squares align right; primes form smooth arcs.</div>
   </div>
+
+  <div class="panel">
+    <div class="pt">3D Sacks Cone</div>
+    <canvas id="tC"></canvas>
+    <div class="ps">The Sacks spiral extruded into a cone: n placed at (√n·cos 2π√n, n/N, √n·sin 2π√n). Hide composites — a cone emerges from prime positions alone.</div>
+    <div class="hint">Drag to rotate · Scroll or pinch to zoom</div>
+  </div>
+
 </div>
 <div id="tip"></div>
 
@@ -106,9 +105,7 @@ function sieve(n) {
   return a;
 }
 
-// ── Ulam coordinate (verified) ─────────────────────────────────────────────
-// Shell k: (2k-1)²+1 … (2k+1)²  |  8k numbers per shell
-// Segments: entry(1) + up(2k-1) + left(2k) + down(2k) + right(2k)
+// ── Ulam XY (verified correct) ─────────────────────────────────────────────
 function ulamXY(n) {
   if (n === 1) return [0, 0];
   const k  = Math.ceil((Math.sqrt(n) - 1) / 2);
@@ -131,20 +128,38 @@ function col(n, N, s) {
   return `hsl(${Math.round(n / N * 280)},88%,62%)`;
 }
 
-// ── Canvas setup ───────────────────────────────────────────────────────────
+// ── Canvas prep ────────────────────────────────────────────────────────────
 function prep(el) {
   const dpr = devicePixelRatio || 1;
   const css = el.getBoundingClientRect().width || el.parentElement.clientWidth;
-  el.width  = Math.round(css * dpr);
-  el.height = Math.round(css * dpr);
+  el.width = el.height = Math.round(css * dpr);
   return { W: el.width, dpr };
 }
 
+// ── Fast batch draw: group dots by colour, one fill per colour group ───────
+function batchDraw(ctx, groups, dotR) {
+  for (const [color, pts] of groups) {
+    if (!pts.length) continue;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (const [px, py] of pts) {
+      ctx.moveTo(px + dotR, py);
+      ctx.arc(px, py, dotR, 0, 6.2832);
+    }
+    ctx.fill();
+  }
+}
+
 // ── State ──────────────────────────────────────────────────────────────────
-let N = 5000, ip = sieve(N);
+let N   = 10000, ip  = sieve(N);
+let N3  = 8000,  ip3 = sieve(N3);
 let uMap = new Map();
 let sArr = [];
-const opts = () => ({ s: document.getElementById('sc').value, comp: document.getElementById('cp').checked });
+
+const opts = () => ({
+  s:    document.getElementById('sc').value,
+  comp: document.getElementById('cp').checked,
+});
 
 // ── Draw Ulam ──────────────────────────────────────────────────────────────
 function drawU() {
@@ -152,23 +167,36 @@ function drawU() {
   const { W, dpr } = prep(el);
   const ctx = el.getContext('2d');
   const o = opts();
-  ctx.fillStyle = '#06060e'; ctx.fillRect(0, 0, W, W);
+
+  ctx.fillStyle = '#05050c'; ctx.fillRect(0, 0, W, W);
+
   const gr   = Math.ceil(Math.sqrt(N) / 2) + 1;
   const cell = W / (2 * gr + 1);
-  const dot  = Math.max(0.9, Math.min(cell * 0.44, 3.2 * dpr));
+  const dot  = Math.max(0.8, Math.min(cell * 0.44, 3 * dpr));
   const ox = W / 2, oy = W / 2;
+
+  // group dots by colour for batch rendering
+  const primeGroups = new Map();   // colour → [[px,py]]
+  const compPts = [];
+
   uMap = new Map();
   for (let n = 1; n <= N; n++) {
     const [gx, gy] = ulamXY(n);
     uMap.set(`${gx},${gy}`, n);
-    const prime = ip[n];
-    if (!prime && !o.comp) continue;
     const px = ox + gx * cell, py = oy - gy * cell;
     if (px < -dot || px > W + dot || py < -dot || py > W + dot) continue;
-    ctx.beginPath(); ctx.arc(px, py, dot, 0, 6.2832);
-    ctx.fillStyle = prime ? col(n, N, o.s) : '#191926';
-    ctx.fill();
+    if (ip[n]) {
+      const c = col(n, N, o.s);
+      if (!primeGroups.has(c)) primeGroups.set(c, []);
+      primeGroups.get(c).push([px, py]);
+    } else if (o.comp) {
+      compPts.push([px, py]);
+    }
   }
+
+  batchDraw(ctx, [['#161624', compPts]], dot);
+  batchDraw(ctx, primeGroups, dot);
+
   el._m = { cell, ox, oy, dpr };
 }
 
@@ -178,68 +206,220 @@ function drawS() {
   const { W, dpr } = prep(el);
   const ctx = el.getContext('2d');
   const o = opts();
-  ctx.fillStyle = '#06060e'; ctx.fillRect(0, 0, W, W);
+
+  ctx.fillStyle = '#05050c'; ctx.fillRect(0, 0, W, W);
+
   const ox = W / 2, oy = W / 2;
   const sc  = (W / 2 - 4) / Math.sqrt(N);
-  const dot = Math.max(0.9, Math.min(sc * 0.3, 3 * dpr));
+  const dot = Math.max(0.8, Math.min(sc * 0.3, 3 * dpr));
+
+  const primeGroups = new Map();
+  const compPts = [];
   sArr = [];
+
   for (let n = 2; n <= N; n++) {
-    const prime = ip[n];
-    if (!prime && !o.comp) continue;
     const r = Math.sqrt(n), th = 2 * Math.PI * r;
     const px = ox + r * sc * Math.cos(th);
     const py = oy - r * sc * Math.sin(th);
-    sArr.push({ n, cx: px / dpr, cy: py / dpr });
+    if (ip[n]) sArr.push({ n, cx: px / dpr, cy: py / dpr });
     if (px < -dot || px > W + dot || py < -dot || py > W + dot) continue;
-    ctx.beginPath(); ctx.arc(px, py, dot, 0, 6.2832);
-    ctx.fillStyle = prime ? col(n, N, o.s) : '#191926';
-    ctx.fill();
+    if (ip[n]) {
+      const c = col(n, N, o.s);
+      if (!primeGroups.has(c)) primeGroups.set(c, []);
+      primeGroups.get(c).push([px, py]);
+    } else if (o.comp) {
+      compPts.push([px, py]);
+    }
+  }
+
+  batchDraw(ctx, [['#161624', compPts]], dot);
+  batchDraw(ctx, primeGroups, dot);
+}
+
+// ── 3D Sacks Cone ──────────────────────────────────────────────────────────
+const cam = { rx: 0.45, ry: 0.0, zoom: 1.0 };
+
+// Integer n maps to normalised 3D point on a cone:
+//   radius r = sqrt(n)/sqrt(N3), height y = 2*n/N3 - 1, angle = 2π*sqrt(n)
+// So at n=0: tip (radius=0), at n=N3: base (radius=1, y=1)
+function cone3D(n) {
+  const t   = n / N3;
+  const r   = Math.sqrt(t);           // normalised radius 0..1
+  const th  = 2 * Math.PI * Math.sqrt(n);
+  return [r * Math.cos(th), 2 * t - 1, r * Math.sin(th)];
+}
+
+function project(x, y, z) {
+  // Rotate Y (yaw)
+  const xr =  x * Math.cos(cam.ry) + z * Math.sin(cam.ry);
+  const zr = -x * Math.sin(cam.ry) + z * Math.cos(cam.ry);
+  // Rotate X (pitch)
+  const yr =  y * Math.cos(cam.rx) - zr * Math.sin(cam.rx);
+  const zr2 = y * Math.sin(cam.rx) + zr * Math.cos(cam.rx);
+  // Perspective
+  const fov = 2.8;
+  const d   = fov / (fov + zr2 + 0.01);
+  return { xp: xr * d, yp: yr * d, depth: zr2 };
+}
+
+let cone3pts = null;   // precomputed [{n, x,y,z}]
+
+function buildCone() {
+  cone3pts = [];
+  for (let n = 2; n <= N3; n++) {
+    const [x, y, z] = cone3D(n);
+    cone3pts.push({ n, x, y, z });
   }
 }
 
-const redraw = () => { drawU(); drawS(); };
+function drawT() {
+  const el = document.getElementById('tC');
+  const { W, dpr } = prep(el);
+  const ctx = el.getContext('2d');
+  const o = opts();
+
+  ctx.fillStyle = '#05050c'; ctx.fillRect(0, 0, W, W);
+
+  const scale = W * 0.38 * cam.zoom;
+  const ox = W / 2, oy = W / 2;
+  const dot = Math.max(1, Math.min(2.5 * dpr, scale * 0.015));
+
+  if (!cone3pts) buildCone();
+
+  // project all points
+  const projected = cone3pts.map(pt => {
+    const { xp, yp, depth } = project(pt.x, pt.y, pt.z);
+    return {
+      n: pt.n,
+      sx: ox + xp * scale,
+      sy: oy - yp * scale,
+      depth,
+    };
+  });
+
+  // painter's algorithm: far → near
+  projected.sort((a, b) => b.depth - a.depth);
+
+  // draw composites first (dim), then primes (bright)
+  const compDots = [], primeDots = new Map();
+
+  for (const pt of projected) {
+    const sx = pt.sx, sy = pt.sy;
+    if (sx < -dot || sx > W + dot || sy < -dot || sy > W + dot) continue;
+    if (ip3[pt.n]) {
+      const c = col(pt.n, N3, o.s);
+      if (!primeDots.has(c)) primeDots.set(c, []);
+      primeDots.get(c).push([sx, sy]);
+    } else if (o.comp) {
+      compDots.push([sx, sy]);
+    }
+  }
+
+  batchDraw(ctx, [['#131322', compDots]], dot);
+  batchDraw(ctx, primeDots, dot);
+}
+
+// ── 3D interaction ─────────────────────────────────────────────────────────
+(function () {
+  const el = document.getElementById('tC');
+  let drag = null, pinchD0 = null, zoom0 = null;
+
+  el.addEventListener('mousedown',  e => { drag = { x: e.clientX, y: e.clientY }; });
+  el.addEventListener('mousemove',  e => {
+    if (!drag) return;
+    cam.ry += (e.clientX - drag.x) * 0.008;
+    cam.rx += (e.clientY - drag.y) * 0.008;
+    drag = { x: e.clientX, y: e.clientY };
+    drawT();
+  });
+  el.addEventListener('mouseup',    () => drag = null);
+  el.addEventListener('mouseleave', () => drag = null);
+  el.addEventListener('wheel',      e => {
+    e.preventDefault();
+    cam.zoom = Math.max(0.3, Math.min(5, cam.zoom * (1 - e.deltaY * 0.001)));
+    drawT();
+  }, { passive: false });
+
+  el.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) {
+      drag = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    } else if (e.touches.length === 2) {
+      drag = null;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchD0 = Math.hypot(dx, dy);
+      zoom0 = cam.zoom;
+    }
+    e.preventDefault();
+  }, { passive: false });
+
+  el.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 1 && drag) {
+      cam.ry += (e.touches[0].clientX - drag.x) * 0.01;
+      cam.rx += (e.touches[0].clientY - drag.y) * 0.01;
+      drag = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      drawT();
+    } else if (e.touches.length === 2 && pinchD0) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const d  = Math.hypot(dx, dy);
+      cam.zoom = Math.max(0.3, Math.min(5, zoom0 * d / pinchD0));
+      drawT();
+    }
+  }, { passive: false });
+
+  el.addEventListener('touchend', () => { drag = null; pinchD0 = null; });
+})();
 
 // ── Controls ───────────────────────────────────────────────────────────────
 document.getElementById('rN').addEventListener('input', function () {
   N = +this.value; ip = sieve(N);
   document.getElementById('vN').textContent = N.toLocaleString();
-  redraw();
+  drawU(); drawS();
 });
-document.getElementById('sc').addEventListener('change', redraw);
-document.getElementById('cp').addEventListener('change', redraw);
-window.addEventListener('resize', redraw);
+document.getElementById('rN3').addEventListener('input', function () {
+  N3 = +this.value; ip3 = sieve(N3);
+  document.getElementById('vN3').textContent = N3.toLocaleString();
+  cone3pts = null; // rebuild
+  drawT();
+});
+document.getElementById('sc').addEventListener('change', () => { drawU(); drawS(); drawT(); });
+document.getElementById('cp').addEventListener('change', () => { drawU(); drawS(); drawT(); });
+window.addEventListener('resize', () => { drawU(); drawS(); drawT(); });
 
 // ── Tooltip ────────────────────────────────────────────────────────────────
 const tip = document.getElementById('tip');
-function showTip(cx, cy, n) {
+function showTip(cx, cy, n, isPrimeArr) {
   if (!n) { tip.style.display = 'none'; return; }
-  const p = ip[n];
-  tip.innerHTML = `<span class="${p?'pr':'co'}">${n.toLocaleString()}</span> — ${p ? '&#10003; prime' : 'composite'}`;
-  tip.style.display  = 'block';
-  tip.style.left = Math.min(cx + 14, innerWidth - 140) + 'px';
+  const p = isPrimeArr[n];
+  tip.innerHTML = `<span class="${p?'pr':'co'}">${n.toLocaleString()}</span> — ${p?'&#10003; prime':'composite'}`;
+  tip.style.display = 'block';
+  tip.style.left = Math.min(cx + 14, innerWidth - 145) + 'px';
   tip.style.top  = Math.max(cy - 30, 4) + 'px';
 }
 const hide = () => { tip.style.display = 'none'; };
 
-function bind(el, hitFn) {
-  el.addEventListener('mousemove', e => showTip(e.clientX, e.clientY, hitFn(e.clientX, e.clientY)));
+function bind2D(elId, hitFn, ipArr) {
+  const el = document.getElementById(elId);
+  const go = (cx, cy) => showTip(cx, cy, hitFn(el, cx, cy), ipArr);
+  el.addEventListener('mousemove',  e => go(e.clientX, e.clientY));
   el.addEventListener('mouseleave', hide);
   el.addEventListener('touchstart', e => {
     e.preventDefault();
-    showTip(e.touches[0].clientX, e.touches[0].clientY, hitFn(e.touches[0].clientX, e.touches[0].clientY));
+    go(e.touches[0].clientX, e.touches[0].clientY);
   }, { passive: false });
   el.addEventListener('touchend', () => setTimeout(hide, 2200));
 }
 
-bind(document.getElementById('uC'), (cx, cy) => {
-  const el = document.getElementById('uC');
+bind2D('uC', (el, cx, cy) => {
   const r = el.getBoundingClientRect(), m = el._m;
   if (!m) return null;
-  return uMap.get(`${Math.round(((cx-r.left)*m.dpr-m.ox)/m.cell)},${Math.round((m.oy-(cy-r.top)*m.dpr)/m.cell)}`);
-});
+  const mx = (cx - r.left) * m.dpr, my = (cy - r.top) * m.dpr;
+  return uMap.get(`${Math.round((mx-m.ox)/m.cell)},${Math.round((m.oy-my)/m.cell)}`);
+}, ip);
 
-bind(document.getElementById('sC'), (cx, cy) => {
-  const el = document.getElementById('sC');
+bind2D('sC', (el, cx, cy) => {
   const r = el.getBoundingClientRect();
   const mx = cx - r.left, my = cy - r.top;
   let best = null, bd = 16;
@@ -248,10 +428,10 @@ bind(document.getElementById('sC'), (cx, cy) => {
     if (d < bd) { bd = d; best = pt.n; }
   }
   return best;
-});
+}, ip);
 
-// Two rAF frames so the browser has laid out canvas dimensions before we read them
-requestAnimationFrame(() => requestAnimationFrame(redraw));
+// ── Boot ───────────────────────────────────────────────────────────────────
+requestAnimationFrame(() => requestAnimationFrame(() => { drawU(); drawS(); drawT(); }));
 </script>
 </body>
 </html>
