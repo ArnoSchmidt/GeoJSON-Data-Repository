@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#1a1a2e;color:#a0c4ff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-size:1.4rem;">
+  <div style="text-align:center">
+    <div>✓ HTML is rendering</div>
+    <canvas id="c" width="100" height="100" style="display:block;margin:16px auto;border:1px solid #a0c4ff"></canvas>
+    <div id="s" style="font-size:0.9rem;color:#666">Canvas: checking...</div>
+  </div>
+  <script>
+    var c=document.getElementById('c'),ctx=c.getContext('2d');
+    ctx.fillStyle='#a0c4ff';ctx.beginPath();ctx.arc(50,50,30,0,6.28);ctx.fill();
+    document.getElementById('s').textContent='Canvas: ✓ working';
+    document.getElementById('s').style.color='#06ffa5';
+  </script>
+</body>
+</html>
