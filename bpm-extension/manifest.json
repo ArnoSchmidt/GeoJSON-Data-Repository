@@ -1,0 +1,59 @@
+{
+  "manifest_version": 3,
+  "name": "BPM Meter & Tempo Control",
+  "version": "1.0.0",
+  "description": "Erkennt die BPM des laufenden Audios (YouTube, SoundCloud, Bandcamp, Mixcloud, ...) und laesst dich das Tempo per UI veraendern.",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "activeTab",
+    "tabCapture",
+    "storage",
+    "scripting"
+  ],
+  "action": {
+    "default_title": "BPM Meter & Tempo Control",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle",
+      "css": [
+        "src/content/overlay.css"
+      ],
+      "js": [
+        "src/content/common.js",
+        "src/content/media.js",
+        "src/content/analyzer.js",
+        "src/content/ui.js",
+        "src/content/main.js"
+      ]
+    }
+  ],
+  "commands": {
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Alt+B"
+      },
+      "description": "BPM-Panel ein-/ausblenden"
+    }
+  }
+}

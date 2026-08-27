@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>BPM E2E</title>
+<audio id="a" src="click128.wav" loop></audio>
+<script src="common.js"></script>
+<script src="analyzer.js"></script>
+<script>
+  // Faehrt den echten Analyzer gegen ein echtes <audio>-Element im Browser.
+  const NS = globalThis.__BPMX;
+  const a = document.getElementById("a");
+  const updates = [];
+  const an = new NS.Analyzer((r) => { window.__last = r; if (r.ready) updates.push(r.bpm); });
+
+  window.__start = async (rate, preservesPitch) => {
+    a.preservesPitch = preservesPitch;
+    a.playbackRate = rate;
+    await a.play();
+    an.startElement(a);
+    return an.ctx.state + " sr=" + an.ctx.sampleRate;
+  };
+  window.__stat = () => {
+    const v = updates.slice(-8).sort((x, y) => x - y);
+    return {
+      median: v.length ? v[Math.floor(v.length / 2)] : 0,
+      n: updates.length,
+      confidence: window.__last ? window.__last.confidence : 0,
+      rms: an.rms
+    };
+  };
+</script>

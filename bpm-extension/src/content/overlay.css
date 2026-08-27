@@ -1,0 +1,11 @@
+/* Nur der Host - das eigentliche Styling liegt im Shadow-Root (ui.js),
+   damit Seiten-CSS das Panel nicht veraendern kann. */
+#bpmx-host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 2147483647;
+  color-scheme: dark;
+}

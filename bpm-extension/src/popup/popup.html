@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>BPM Meter &amp; Tempo Control</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <span class="dot" id="dot"></span>
+    <h1>BPM &amp; Tempo</h1>
+  </header>
+
+  <section class="readout">
+    <span class="bpm dim" id="bpm">--</span>
+    <span class="unit">BPM</span>
+    <span class="status" id="status">verbinde …</span>
+  </section>
+  <div class="conf"><i id="conf"></i></div>
+
+  <button class="btn primary block" id="toggle">Messung starten</button>
+
+  <div class="row">
+    <label for="target">Ziel-BPM</label>
+    <input type="number" id="target" step="0.5" min="20" max="400" disabled>
+    <span class="rate" id="rate">1.00×</span>
+  </div>
+  <input type="range" id="rateSlider" min="0.5" max="2" step="0.005" value="1">
+
+  <div class="row btns">
+    <button class="btn" id="minus5">-5%</button>
+    <button class="btn" id="plus5">+5%</button>
+    <button class="btn" id="pitch">Tonhöhe halten</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+
+  <button class="btn block" id="panel">Panel auf der Seite anzeigen</button>
+  <p class="hint" id="hint">Tipp: <b>Alt+B</b> blendet das Panel direkt auf der Seite ein.</p>
+
+  <script src="popup.js"></script>
+</body>
+</html>
